@@ -179,7 +179,7 @@ export default function HomeDashboard() {
             <div className={`index-val ${indices.vix.cls}`}>
               {indices.vix.cls === 'up' ? '▲' : '▼'} {indices.vix.val}
             </div>
-            <a href="/optionchain" className="option-chain-link">Option Chain &rsaquo;</a>
+            {/* <a href="/optionchain" className="option-chain-link">Option Chain &rsaquo;</a> */}
           </div>
         </div>
       </div>
