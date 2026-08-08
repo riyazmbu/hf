@@ -1,0 +1,263 @@
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 16px;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.card-panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.view-all-link {
+  font-size: 12px;
+  color: #0066cc;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.view-all-link:hover {
+  text-decoration: underline;
+}
+
+.quad-indices-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  height: 100%;
+}
+
+.index-mini-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.index-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.index-val {
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.index-val.up {
+  color: #00bfa5;
+}
+
+.index-val.down {
+  color: #ff5252;
+}
+
+.option-chain-link {
+  font-size: 11px;
+  color: #0066cc;
+  text-decoration: none;
+  margin-top: 8px;
+}
+
+.news-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-grow: 1;
+}
+
+.news-card-item {
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 8px;
+}
+
+.news-card-item:last-child {
+  border-bottom: none;
+}
+
+.news-card-headline {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e293b;
+  text-decoration: none;
+  line-height: 1.4;
+  display: block;
+}
+
+.news-card-headline:hover {
+  color: #0066cc;
+}
+
+.news-card-meta {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+.pagination-btns {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.page-btn {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  color: #475569;
+}
+
+.horizontal-bar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bar-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+.bar-item-label {
+  width: 35%;
+  font-weight: 600;
+  color: #334155;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bar-item-track {
+  width: 63%;
+  height: 20px;
+  background: #f8fafc;
+  border-radius: 4px;
+  position: relative;
+  overflow: visible;
+}
+
+.center-line {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: #cbd5e1;
+  z-index: 1;
+}
+
+.bar-item-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  transition: width 0.3s ease;
+  z-index: 2;
+  min-width: 2px;
+}
+
+.bar-item-fill.up {
+  left: 50%;
+  right: auto;
+  background: #00bfa5;
+  border-radius: 0 4px 4px 0;
+}
+
+.bar-item-fill.down {
+  right: 50%;
+  left: auto;
+  background: #ff5252;
+  border-radius: 4px 0 0 4px;
+}
+
+.bar-item-text {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.bar-item-text.text-right {
+  left: 6px;
+  color: #033100;
+}
+
+.bar-item-text.text-left {
+  right: 6px;
+  color: #770000;
+}
+
+.bottom-movers-grid {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.loading-state {
+  color: #64748b;
+  font-size: 13px;
+  padding: 20px 0;
+}
+
+.sector-loading-state {
+  color: #64748b;
+  font-size: 13px;
+  padding: 8px 0;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bottom-movers-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .bottom-movers-grid {
+    grid-template-columns: 1fr;
+  }
+}
