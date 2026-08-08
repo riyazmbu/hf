@@ -1,0 +1,832 @@
+/* ==========================================================================
+   Interactive Elements & Utilities
+   ========================================================================== */
+
+.counter {
+  font-size: 16px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 2px solid transparent;
+  transition: border-color 0.3s;
+  margin-bottom: 24px;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.ticks {
+  position: relative;
+  width: 100%;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: -4.5px;
+    border: 5px solid transparent;
+  }
+
+  &::before {
+    left: 0;
+    border-left-color: var(--border);
+  }
+
+  &::after {
+    right: 0;
+    border-right-color: var(--border);
+  }
+}
+
+#spacer {
+  height: 88px;
+  border-top: 1px solid var(--border);
+
+  @media (max-width: 1024px) {
+    height: 48px;
+  }
+}
+
+/* ==========================================================================
+   Hero Section & Visual FX
+   ========================================================================== */
+
+.hero {
+  position: relative;
+
+  .base,
+  .framework,
+  .vite {
+    inset-inline: 0;
+    margin: 0 auto;
+  }
+
+  .base {
+    width: 170px;
+    position: relative;
+    z-index: 0;
+  }
+
+  .framework,
+  .vite {
+    position: absolute;
+  }
+
+  .framework {
+    z-index: 1;
+    top: 34px;
+    height: 28px;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg) scale(1.4);
+  }
+
+  .vite {
+    z-index: 0;
+    top: 107px;
+    height: 26px;
+    width: auto;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg) scale(0.8);
+  }
+}
+
+.hero-block {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+}
+
+.hero-left, .hero-right {
+  flex: 1;
+  min-width: 0;
+}
+
+.hero-right {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.hero-video-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: transparent;
+
+  iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    object-fit: cover;
+  }
+}
+
+/* ==========================================================================
+   Main Layout Modules
+   ========================================================================== */
+
+#center {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  place-content: center;
+  place-items: center;
+  flex-grow: 1;
+
+  @media (max-width: 1024px) {
+    padding: 32px 20px 24px;
+    gap: 18px;
+  }
+}
+
+#next-steps {
+  display: flex;
+  border-top: 1px solid var(--border);
+  text-align: left;
+
+  & > div {
+    flex: 1 1 0;
+    padding: 32px;
+
+    @media (max-width: 1024px) {
+      padding: 24px 20px;
+    }
+  }
+
+  .icon {
+    margin-bottom: 16px;
+    width: 22px;
+    height: 22px;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    gap: 8px;
+    margin: 32px 0 0;
+
+    .logo {
+      height: 18px;
+    }
+
+    a {
+      color: var(--text-h);
+      font-size: 16px;
+      border-radius: 6px;
+      background: var(--social-bg);
+      display: flex;
+      padding: 6px 12px;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: box-shadow 0.3s;
+
+      &:hover {
+        box-shadow: var(--shadow);
+      }
+
+      .button-icon {
+        height: 18px;
+        width: 18px;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      margin-top: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+
+      li {
+        flex: 1 1 calc(50% - 8px);
+      }
+
+      a {
+        width: 100%;
+        justify-content: center;
+        box-sizing: border-box;
+      }
+    }
+  }
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+#docs {
+  border-right: 1px solid var(--border);
+
+  @media (max-width: 1024px) {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+/* ==========================================================================
+   Sectoral Distribution HUD (pie chart + full legend + bg motif)
+   ========================================================================== */
+
+.hero-right-hud {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  max-width: 620px;
+  padding: 20px;
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    max-width: 100%;
+    padding: 16px;
+  }
+}
+
+/* Animated background chart motif, sits behind card content */
+.hero-right-hud::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.1;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'><polyline points='0,150 40,120 80,140 120,80 160,100 200,50 240,70 280,30 320,60 360,20 400,45' fill='none' stroke='%2322c55e' stroke-width='2'/><polyline points='0,170 40,160 80,175 120,140 160,155 200,110 240,130 280,95 320,115 360,80 400,100' fill='none' stroke='%23ef4444' stroke-width='1.5' stroke-opacity='0.6'/></svg>");
+  background-size: 220% 220%;
+  background-repeat: no-repeat;
+  animation: chartDrift 20s ease-in-out infinite alternate;
+}
+
+.hero-right-hud > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes chartDrift {
+  0%   { background-position: 0% 10%; }
+  100% { background-position: 100% 40%; }
+}
+
+.hud-sentiment-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-h, #ffffff);
+}
+
+.hud-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hud-title-text {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--text-h, #ffffff);
+  text-transform: uppercase;
+}
+
+.hud-live-tag {
+  font-size: 10px;
+  font-weight: 800;
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.15);
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.sector-loading-state {
+  color: #94a3b8;
+  font-size: 13px;
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* ---- Optimized 2-Column Sector Legend Grid ---- */
+.sector-legend-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 12px;
+  width: 100%;
+}
+
+.sector-legend-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 0;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  &.active {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  &.pinned {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+  }
+
+  .legend-name-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+
+    span:last-child {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted, #94a3b8);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .legend-value {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: var(--mono, monospace);
+    color: #ffffff;
+  }
+}
+
+@media (max-width: 380px) {
+  .sector-legend-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   About / Contact — Contact Form
+   ========================================================================== */
+
+.contact-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 24px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-field-full {
+  grid-column: 1 / -1;
+}
+
+.form-field label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.form-field .search-input-box {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.contact-textarea {
+  resize: vertical;
+  min-height: 120px;
+  font-family: inherit;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .contact-form-grid {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+}
+
+.hero-left {
+  display: flex;
+  width: 100%;
+}
+
+.news-feed-panel {
+  position: relative;
+  width: 100%;
+  padding: 20px;
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  min-height: 420px;
+}
+
+.news-feed-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-weight: 700;
+  font-size: 14px;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.news-feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+  max-height: 460px;
+  padding-right: 4px;
+}
+
+.news-feed-list::-webkit-scrollbar { width: 5px; }
+.news-feed-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+.news-item {
+  display: block;
+  text-decoration: none;
+  padding: 10px;
+  border-radius: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.18s ease;
+  cursor: pointer;
+}
+.news-item:last-child { border-bottom: none; }
+.news-item:hover { background: rgba(255, 255, 255, 0.05); }
+
+.news-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.news-time {
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--mono);
+  color: #566178;
+}
+
+.news-symbol {
+  font-size: 11px;
+  font-weight: 700;
+  color: #00B0FF;
+}
+
+.news-category {
+  font-size: 10px;
+  font-weight: 600;
+  color: #a0aec0;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.news-headline {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #cbd5e1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.news-item:hover .news-headline { color: #ffffff; }
+
+@media (max-width: 768px) {
+  .news-feed-panel { min-height: 320px; }
+  .news-feed-list { max-height: 320px; }
+}
+
+/* Container Box */
+.news-table-container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  box-sizing: border-box;
+}
+
+/* Header Area */
+.news-table-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.news-table-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.live-badge {
+  background-color: #fee2e2;
+  color: #991b1b;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+/* Table Wrapper */
+.news-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Table Design */
+.news-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+  min-width: 500px;
+}
+
+.news-table th {
+  background-color: #f1f5f9;
+  color: #475569;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-bottom: 1px solid #cbd5e1;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+.news-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  color: #334155;
+  vertical-align: top;
+}
+
+.news-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.news-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+/* Column Width Allocations */
+.col-time {
+  width: 15%;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.col-company {
+  width: 20%;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.col-headline {
+  width: 25%;
+  font-weight: 500;
+}
+
+.col-sub {
+  width: 40%;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.headline-link {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.headline-link:hover {
+  text-decoration: underline;
+}
+
+.status-cell {
+  text-align: center;
+  color: #64748b;
+  padding: 24px !important;
+}
+
+/* ==========================================================================
+   Mobile-Responsive Enhancements & Layout Controls
+   ========================================================================== */
+
+@media (max-width: 992px) {
+  .hero-block {
+    flex-direction: column;
+  }
+
+  .indices-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .sub-movers-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .indices-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .sub-movers-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .workspace-control-hud {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-wrapper {
+    max-width: 100% !important;
+  }
+
+  .news-table-container {
+    padding: 12px;
+  }
+
+  .news-table-header {
+    padding: 10px 12px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .news-table th,
+  .news-table td {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  /* Drop the least-critical column so the remaining ones fit without
+     forcing the whole page into horizontal scroll on a phone */
+  .news-table .col-sub {
+    display: none;
+  }
+
+  .col-time { width: auto; }
+  .col-company { width: auto; }
+  .col-headline { width: auto; }
+
+  .news-table {
+    min-width: 0;
+  }
+}
+/* ==========================================================================
+   Hero Section - Full Width & Vertical Stack Fix
+   ========================================================================== */
+
+/* 1. Force the container to display top-to-bottom and span 100% full screen width */
+.hero-block {
+  display: flex !important;
+  flex-direction: column !important; /* Forces up-and-down layout */
+  gap: 24px !important;
+  width: 100vw !important; /* Full screen viewport width */
+  max-width: 100vw !important;
+  position: relative !important;
+  left: 50% !important;
+  right: 50% !important;
+  margin-left: -50vw !important; /* Pulls elements out of container boundaries to screen edges */
+  margin-right: -50vw !important;
+  padding: 0 20px !important; /* Adds subtle breathing room on left & right screen edges */
+  box-sizing: border-box !important;
+}
+
+/* 2. Make each section take 100% of the horizontal space */
+.hero-left, 
+.hero-right {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  flex: none !important; /* Overrides flex: 1 */
+  box-sizing: border-box !important;
+}
+
+/* 3. Ensure internal panels and tables stretch completely */
+.news-table-container,
+.hero-right-hud,
+.news-feed-panel {
+  width: 100% !important;
+  max-width: 100% !important; /* Removes inner restrictions (e.g. max-width: 620px) */
+  box-sizing: border-box !important;
+}
+
+/* ==========================================================================
+   Full Width Vertical Stacked Layout (New Classnames)
+   ========================================================================== */
+
+/* Outer container spanning full viewport width */
+.fullwidth-hero-stack {
+  display: block;
+  width: 100vw;
+  max-width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+/* Top Section (News Table) */
+.fullwidth-section-top {
+  display: block;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+/* Bottom Section (Sector HUD) */
+.fullwidth-section-bottom {
+  display: block;
+  width: 100%;
+}
+
+/* Unconstrained HUD Card stretching 100% width */
+.fullwidth-hud-card {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  padding: 20px;
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+}
