@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { SHEET_ID, INDEX_CARDS } from '../../constants/market'
-import { dispatchGoogleSheetRequest } from '../../services/googleSheets'
-import { findRowByKeyword, parseChangePercent, parseRows } from '../../utils/marketData'
 import HorizontalBarList from './HorizontalBarList'
 import './Dashboard.css'
 
+const API_BASE_URL = 'https://heyfund-backend.onrender.com'
+
+const initialIndices = {
+  nifty: { val: '--', change: '--', cls: 'up' },
+  bank: { val: '--', change: '--', cls: 'up' },
+  sensex: { val: '--', change: '--', cls: 'up' },
+  vix: { val: '--', change: '--', cls: 'up' },
+}
+
 export default function HomeDashboard() {
+  const [indices, setIndices] = useState(initialIndices)
   const [sectors, setSectors] = useState([])
-  const [indices, setIndices] = useState({
-    nifty: { val: '--', change: '--', cls: 'up' },
-    bank: { val: '--', change: '--', cls: 'up' },
-    sensex: { val: '--', change: '--', cls: 'up' },
-    vix: { val: '--', change: '--', cls: 'up' },
-  })
   const [movers, setMovers] = useState({
     gainers: [],
     losers: [],
@@ -21,148 +21,117 @@ export default function HomeDashboard() {
     intradayLosers: [],
   })
 
-  useEffect(() => {
-    window.processIndices = function (data) {
-      const rows = parseRows(data.table)
+  const formatIndex = (data) => {
+    if (!data) return { val: '--', change: '--', cls: 'up' }
+    const ltp = Number(data.ltp)
+    const changePct = Number(data.changePct)
 
-      setIndices((prev) => {
-        const next = { ...prev }
-        INDEX_CARDS.forEach((item) => {
-          const matchingRow = findRowByKeyword(rows, item.searchKey)
-          if (matchingRow.length >= 9) {
-            const cmpVal = matchingRow[6] !== undefined && matchingRow[6] !== '' ? matchingRow[6] : '--'
-            const rawPct = matchingRow[7] !== undefined ? String(matchingRow[7]).trim() : ''
-            const rawChange = matchingRow[8] !== undefined ? String(matchingRow[8]).trim() : ''
+    return {
+      val: Number.isFinite(ltp)
+        ? ltp.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        : '--',
+      change: Number.isFinite(changePct)
+        ? `${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}%`
+        : '--',
+      cls: changePct < 0 ? 'down' : 'up',
+    }
+  }
 
-            let changeText = '--'
-            if (rawChange || rawPct) {
-              const formattedPct = rawPct.includes('%') ? rawPct : `${rawPct}%`
-              changeText = `${formattedPct}`
-            }
+  const processMarketData = (data) => {
+    if (!data) return
 
-            const numericChange = parseChangePercent(rawPct || rawChange)
-            const isNegative = numericChange < 0
-            const finalCls = isNegative ? 'down' : 'up'
+    setIndices({
+      nifty: formatIndex(data.indices?.NIFTY),
+      bank: formatIndex(data.indices?.BANKNIFTY),
+      sensex: formatIndex(data.indices?.SENSEX),
+      vix: formatIndex(data.indices?.INDIAVIX),
+    })
 
-            const formattedCmp = typeof cmpVal === 'number'
-              ? cmpVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-              : cmpVal
+    const sectorData = data.sectors || {}
+    setSectors(
+      Object.entries(sectorData)
+        .map(([name, value]) => ({
+          name,
+          pct: Number(value) || 0,
+          change: `${Number(value) >= 0 ? '+' : ''}${Number(value).toFixed(2)}%`,
+        }))
+        .sort((a, b) => b.pct - a.pct)
+    )
 
-            next[item.key] = { val: formattedCmp, change: changeText, cls: finalCls }
-          }
-        })
-        return next
+    const marketMovers = data.movers || {}
+
+    const formatMovers = (items = [], keyName = 'changePct') => {
+      if (!Array.isArray(items)) return []
+      return items.map((item) => {
+        const pct = Number(item[keyName])
+        return {
+          name: item.symbol || '--',
+          pct: Number.isFinite(pct) ? pct : 0,
+          change: Number.isFinite(pct)
+            ? `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%`
+            : '0.00%',
+        }
       })
-
-      const parsedSectors = rows
-        .map((row) => {
-          const nameCell = row.find((cell) => cell && typeof cell === 'string' && cell.trim().length > 0) || ''
-          const rawPct = String(row[8] !== undefined && row[8] !== '' ? row[8] : row[7] || row[3] || '').trim()
-          const pctNum = parseChangePercent(rawPct)
-          const displayName = String(nameCell).replace(/^NIFTY\s*|_/gi, ' ').trim()
-
-          return {
-            name: displayName,
-            pct: pctNum,
-            change: rawPct ? (rawPct.includes('%') ? rawPct : `${rawPct}%`) : '0.00%',
-          }
-        })
-        .filter((sector) => sector.name && sector.name.length >= 2 && sector.change !== '0.00%')
-        .slice(2, 10)
-
-      setSectors(parsedSectors)
     }
 
-    window.processMovers = function (data) {
-      const rows = parseRows(data.table)
+    setMovers({
+      gainers: formatMovers(marketMovers.topGainers, 'changePct'),
+      losers: formatMovers(marketMovers.topLosers, 'changePct'),
+      intradayGainers: formatMovers(marketMovers.topIntradayGainers, 'intradayPct'),
+      intradayLosers: formatMovers(marketMovers.topIntradayLosers, 'intradayPct'),
+    })
+  }
 
-      const intradayGainers = rows
-        .map((row) => {
-          const name = String(row[11] || '').trim()
-          const rawPct = String(row[13] || '').trim()
-          return {
-            name,
-            change: rawPct ? (rawPct.includes('%') ? rawPct : `${rawPct}%`) : '0.00%',
-            pct: parseChangePercent(rawPct),
-          }
-        })
-        .filter((item) => item.name && !item.name.toUpperCase().includes('SYMBOL'))
-        .slice(0, 5)
+  useEffect(() => {
+    let ws
+    let reconnectTimer
+    let mounted = true
 
-      const intradayLosers = rows
-        .map((row) => {
-          const name = String(row[16] || '').trim()
-          const rawPct = String(row[18] || '').trim()
-          return {
-            name,
-            change: rawPct ? (rawPct.includes('%') ? rawPct : `${rawPct}%`) : '0.00%',
-            pct: parseChangePercent(rawPct),
-          }
-        })
-        .filter((item) => item.name && !item.name.toUpperCase().includes('SYMBOL'))
-        .slice(0, 5)
-
-      const losers = rows
-        .map((row) => {
-          const name = String(row[6] || '').trim()
-          const rawPct = String(row[8] || '').trim()
-          return {
-            name,
-            change: rawPct ? (rawPct.includes('%') ? rawPct : `${rawPct}%`) : '0.00%',
-            pct: parseChangePercent(rawPct),
-          }
-        })
-        .filter((item) => item.name && !item.name.toUpperCase().includes('SYMBOL'))
-        .slice(0, 5)
-
-      const gainers = rows
-        .map((row) => {
-          const name = String(row[1] || '').trim()
-          const rawPct = String(row[3] || '').trim()
-          return {
-            name,
-            change: rawPct ? (rawPct.includes('%') ? rawPct : `${rawPct}%`) : '0.00%',
-            pct: parseChangePercent(rawPct),
-          }
-        })
-        .filter((item) => item.name && !item.name.toUpperCase().includes('SYMBOL'))
-        .slice(0, 5)
-
-      setMovers({ gainers, losers, intradayGainers, intradayLosers })
+    const fetchInitialData = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/snapshot`)
+        if (res.ok && mounted) {
+          const data = await res.json()
+          processMarketData(data)
+        }
+      } catch (err) {
+        console.error('Snapshot fetch error:', err)
+      }
     }
 
-    dispatchGoogleSheetRequest({ spreadsheetId: SHEET_ID, sheet: 'Indices', handler: 'processIndices' })
-    dispatchGoogleSheetRequest({ spreadsheetId: SHEET_ID, sheet: 'Top10', handler: 'processMovers' })
+    const connectWebSocket = () => {
+      if (!mounted) return
+      ws = new WebSocket(`${API_BASE_URL.replace('http', 'ws')}/ws`)
 
-    const interval = setInterval(() => {
-      dispatchGoogleSheetRequest({ spreadsheetId: SHEET_ID, sheet: 'Indices', handler: 'processIndices' })
-      dispatchGoogleSheetRequest({ spreadsheetId: SHEET_ID, sheet: 'Top10', handler: 'processMovers' })
-    }, 15000)
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data)
+          if (data.type === 'snapshot' && mounted) {
+            processMarketData(data)
+          }
+        } catch (err) {
+          console.error('WS Parse Error:', err)
+        }
+      }
+
+      ws.onclose = () => {
+        if (mounted) reconnectTimer = setTimeout(connectWebSocket, 3000)
+      }
+    }
+
+    fetchInitialData()
+    connectWebSocket()
 
     return () => {
-      clearInterval(interval)
-      delete window.processIndices
-      delete window.processMovers
+      mounted = false
+      if (reconnectTimer) clearTimeout(reconnectTimer)
+      if (ws) ws.close()
     }
   }, [])
 
   return (
     <div className="dashboard-grid">
-      {/* <div className="card-panel hero-panel"> */}
-        {/* <div className="hero-copy">
-          <span className="hero-eyebrow">HeyFund market workspace</span>
-          <h2>Track ideas, scan opportunities, and explore market data from one dashboard.</h2>
-          <p>Choose a focused module below to open a dedicated page with placeholder content that is ready for your API later.</p>
-        </div> */}
-        {/* <div className="hero-links-grid"> */}
-          {/* <Link to="/features/screener" className="hero-link-card">Screener</Link>
-          <Link to="/features/option-chain" className="hero-link-card">Option Chain</Link>
-          <Link to="/features/blog" className="hero-link-card">Blog</Link>
-          <Link to="/features/news" className="hero-link-card">News</Link>
-          <Link to="/features/sector" className="hero-link-card">Sector</Link> */}
-        {/* </div> */}
-      {/* </div> */}
-
+      {/* INDICES */}
       <div className="card-panel">
         <div className="quad-indices-grid">
           <div className="index-mini-card">
@@ -170,56 +139,52 @@ export default function HomeDashboard() {
             <div className={`index-val ${indices.nifty.cls}`}>
               {indices.nifty.cls === 'up' ? '▲' : '▼'} {indices.nifty.val}
             </div>
-            <a href="/optionchain" className="option-chain-link">Option Chain &rsaquo;</a>
+            <div className={`index-change ${indices.nifty.cls}`}>{indices.nifty.change}</div>
           </div>
-
           <div className="index-mini-card">
             <div className="index-title">BANKNIFTY</div>
             <div className={`index-val ${indices.bank.cls}`}>
               {indices.bank.cls === 'up' ? '▲' : '▼'} {indices.bank.val}
             </div>
-            <a href="/optionchain" className="option-chain-link">Option Chain &rsaquo;</a>
+            <div className={`index-change ${indices.bank.cls}`}>{indices.bank.change}</div>
           </div>
-
           <div className="index-mini-card">
             <div className="index-title">SENSEX</div>
             <div className={`index-val ${indices.sensex.cls}`}>
               {indices.sensex.cls === 'up' ? '▲' : '▼'} {indices.sensex.val}
             </div>
-            <a href="/optionchain" className="option-chain-link">Option Chain &rsaquo;</a>
+            <div className={`index-change ${indices.sensex.cls}`}>{indices.sensex.change}</div>
           </div>
-
           <div className="index-mini-card">
             <div className="index-title">INDIA VIX</div>
             <div className={`index-val ${indices.vix.cls}`}>
               {indices.vix.cls === 'up' ? '▲' : '▼'} {indices.vix.val}
             </div>
-            {/* <a href="/optionchain" className="option-chain-link">Option Chain &rsaquo;</a> */}
+            <div className={`index-change ${indices.vix.cls}`}>{indices.vix.change}</div>
           </div>
         </div>
       </div>
 
-      
-
+      {/* SECTOR OVERVIEW */}
       <div className="card-panel">
         <div className="panel-header">
           <h3>Sector Overview</h3>
-          <a href="/sectors" className="view-all-link">View All</a>
         </div>
-        <HorizontalBarList items={sectors.map((sector) => ({ ...sector, pct: sector.pct }))} isGainer />
+        <HorizontalBarList items={sectors} isGainer />
       </div>
 
+      {/* MARKET MOVERS */}
       <div className="bottom-movers-grid">
         <div className="card-panel">
           <div className="panel-header">
-            <h3>Top GAP UP</h3>
+            <h3>Top Gainers</h3>
           </div>
           <HorizontalBarList items={movers.gainers} isGainer />
         </div>
 
         <div className="card-panel">
           <div className="panel-header">
-            <h3>Top GAP DOWN</h3>
+            <h3>Top Losers</h3>
           </div>
           <HorizontalBarList items={movers.losers} isGainer={false} />
         </div>

@@ -1,35 +1,40 @@
-import './Dashboard.css'
+import React from 'react'
+import './HorizontalBarList.css'
 
-export default function HorizontalBarList({ items, isGainer = true }) {
+export default function HorizontalBarList({ items = [], isGainer }) {
   if (!items || items.length === 0) {
-    return <div className="sector-loading-state">Loading metrics...</div>
+    return <div className="empty-list-state">No data available</div>
   }
 
+  // Find max absolute percentage to normalize bar fill width
   const maxPct = Math.max(...items.map((item) => Math.abs(item.pct || 0)), 1)
 
   return (
     <div className="horizontal-bar-list">
-      {items.map((item, idx) => {
-        const val = item.pct || 0
-        const isPositive = isGainer ? val >= 0 : val <= 0
-        const fillWidth = Math.min((Math.abs(val) / maxPct) * 50, 50)
+      {items.map((item, index) => {
+        const pct = item.pct || 0
+        
+        // Stock is negative if percentage is < 0 OR explicitly set via isGainer prop
+        const isNegative = pct < 0 || isGainer === false
+        const colorClass = isNegative ? 'is-red' : 'is-green'
+        
+        // Calculate relative width percentage (capped between 0% and 100%)
+        const barWidth = Math.min((Math.abs(pct) / maxPct) * 100, 100)
 
         return (
-          <div className="bar-item-row" key={`${item.name}-${idx}`}>
-            <span className="bar-item-label" title={item.name}>
-              {item.name}
-            </span>
-            <div className="bar-item-track">
-              <div className="center-line" />
+          <div key={item.name || index} className="bar-row">
+            <span className="stock-name">{item.name}</span>
+
+            <div className="bar-track">
               <div
-                className={`bar-item-fill ${isPositive ? 'up' : 'down'}`}
-                style={{ width: `${fillWidth}%` }}
-              >
-                <span className={`bar-item-text ${isPositive ? 'text-right' : 'text-left'}`}>
-                  {item.change}
-                </span>
-              </div>
+                className={`bar-fill ${colorClass}`}
+                style={{ width: `${barWidth}%` }}
+              />
             </div>
+
+            <span className={`stock-change-text ${colorClass}`}>
+              {isNegative ? '▼' : '▲'} {item.change || `${pct.toFixed(2)}%`}
+            </span>
           </div>
         )
       })}
