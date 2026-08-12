@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { SHEET_ID, INDEX_CARDS } from '../../constants/market'
 import { dispatchGoogleSheetRequest } from '../../services/googleSheets'
 import { findRowByKeyword, parseChangePercent, parseRows } from '../../utils/marketData'
 import HorizontalBarList from './HorizontalBarList'
-import TopNewsFeed from './TopNewsFeed'
 import './Dashboard.css'
 
 export default function HomeDashboard() {
@@ -148,6 +148,21 @@ export default function HomeDashboard() {
 
   return (
     <div className="dashboard-grid">
+      {/* <div className="card-panel hero-panel"> */}
+        {/* <div className="hero-copy">
+          <span className="hero-eyebrow">HeyFund market workspace</span>
+          <h2>Track ideas, scan opportunities, and explore market data from one dashboard.</h2>
+          <p>Choose a focused module below to open a dedicated page with placeholder content that is ready for your API later.</p>
+        </div> */}
+        {/* <div className="hero-links-grid"> */}
+          {/* <Link to="/features/screener" className="hero-link-card">Screener</Link>
+          <Link to="/features/option-chain" className="hero-link-card">Option Chain</Link>
+          <Link to="/features/blog" className="hero-link-card">Blog</Link>
+          <Link to="/features/news" className="hero-link-card">News</Link>
+          <Link to="/features/sector" className="hero-link-card">Sector</Link> */}
+        {/* </div> */}
+      {/* </div> */}
+
       <div className="card-panel">
         <div className="quad-indices-grid">
           <div className="index-mini-card">

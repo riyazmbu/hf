@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Routes, Route, NavLink } from 'react-router-dom'
 import BlogModule from './BlogModule'
 import NewsModule from './NewsModule'
@@ -10,6 +10,7 @@ import Contact from './Contact'
 import Sector from './Sector'
 import HomeDashboard from './components/dashboard/HomeDashboard'
 import AppShell from './components/layout/AppShell'
+import FeaturePage from './components/pages/FeaturePage'
 
 const PROMO_DISMISS_KEY = 'heyfund_promo_dismissed_until'
 
@@ -25,13 +26,15 @@ export default function App() {
   function closeMobileNav() { setNavOpen(false) }
   function openPromoModal() { setPromoVisible(true) }
 
-  function closePromoModal(persist) {
+  const closePromoModal = useCallback((persist) => {
     setPromoVisible(false)
     if (persist || promoDismissChecked) {
       const expiry = Date.now() + 24 * 60 * 60 * 1000
-      try { localStorage.setItem(PROMO_DISMISS_KEY, String(expiry)) } catch (e) {}
+      try { localStorage.setItem(PROMO_DISMISS_KEY, String(expiry)) } catch {
+        // Ignore storage errors and continue gracefully.
+      }
     }
-  }
+  }, [promoDismissChecked])
 
   useEffect(() => {
     function onKeyDown(e) {
@@ -39,12 +42,17 @@ export default function App() {
     }
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
-  }, [promoDismissChecked])
+  }, [closePromoModal, promoDismissChecked])
 
   useEffect(() => {
-    let dismissedUntil = 0
-    try { dismissedUntil = parseInt(localStorage.getItem(PROMO_DISMISS_KEY) || '0', 10) } catch (e) {}
-    if (Date.now() > dismissedUntil) {
+    const savedUntil = (() => {
+      try {
+        return parseInt(localStorage.getItem(PROMO_DISMISS_KEY) || '0', 10)
+      } catch {
+        return 0
+      }
+    })()
+    if (Date.now() > savedUntil) {
       const t = setTimeout(openPromoModal, 2200)
       return () => clearTimeout(t)
     }
@@ -59,6 +67,22 @@ export default function App() {
       >
         <Routes>
           <Route path="/" element={<HomeDashboard />} />
+          
+          {/* Market Data Routes */}
+          <Route path="/market-data/ltp" element={<FeaturePage title="LTP Data" eyebrow="Market Data" description="Live Last Traded Price streams and realtime ticks." ctaLabel="Open Dashboard" ctaTo="/" />} />
+          <Route path="/market-data/ohlc" element={<FeaturePage title="OHLC Data" eyebrow="Market Data" description="Open, High, Low, and Close updates across indices and stocks." ctaLabel="Open Dashboard" ctaTo="/" />} />
+          <Route path="/market-data/historical" element={<FeaturePage title="Historical Data" eyebrow="Market Data" description="Historical price action, charts, and backtesting metrics." ctaLabel="Open Screener" ctaTo="/screener" />} />
+          <Route path="/market-data/fii-dii" element={<FeaturePage title="FII / DII Activity" eyebrow="Market Data" description="Institutional buying and selling data across Cash and F&O." ctaLabel="Open Dashboard" ctaTo="/" />} />
+          <Route path="/market-data/fundamentals" element={<FeaturePage title="Fundamentals" eyebrow="Market Data" description="Financial statements, ratios, quarterly results, and balance sheets." ctaLabel="Open Screener" ctaTo="/screener" />} />
+          
+          {/* Options Data Routes */}
+          <Route path="/options-data/chain" element={<OptionChain />} />
+          <Route path="/options-data/greeks" element={<FeaturePage title="Option Greeks" eyebrow="Options Data" description="Delta, Gamma, Theta, Vega, and IV analytics for options contracts." ctaLabel="Open Option Chain" ctaTo="/optionchain" />} />
+          <Route path="/options-data/oi" element={<FeaturePage title="Open Interest Analysis" eyebrow="Options Data" description="OI build-up, long unwinding, and short covering tracking." ctaLabel="Open Option Chain" ctaTo="/optionchain" />} />
+          <Route path="/options-data/pcr" element={<FeaturePage title="Put Call Ratio (PCR)" eyebrow="Options Data" description="Track overall market sentiment with live PCR charts and trends." ctaLabel="Open Option Chain" ctaTo="/optionchain" />} />
+          <Route path="/options-data/max-pain" element={<FeaturePage title="Max Pain" eyebrow="Options Data" description="Expiry strike projections and maximum loss levels for option writers." ctaLabel="Open Option Chain" ctaTo="/optionchain" />} />
+
+          {/* Core Routes */}
           <Route
             path="/blog/:slug?"
             element={
@@ -78,6 +102,78 @@ export default function App() {
           />
           <Route path="/news" element={<NewsModule />} />
           <Route path="/screener" element={<Screener />} />
+          
+          {/* Features Routes */}
+          <Route
+            path="/features/screener"
+            element={
+              <FeaturePage
+                title="Screener"
+                eyebrow="Market scanner"
+                description="A dedicated workspace for filtering stocks, sectors, and momentum setups before you trade."
+                stats={[{ value: '120+', label: 'Screen criteria' }, { value: 'Live', label: 'Data status' }, { value: '24/7', label: 'Monitoring' }]}
+                highlights={['Custom filters and watchlists', 'Momentum, volatility, and breakout signals', 'Ready for live market API integration']}
+                ctaLabel="Open screener"
+                ctaTo="/screener"
+              />
+            }
+          />
+          <Route
+            path="/features/option-chain"
+            element={
+              <FeaturePage
+                title="Option Chain"
+                eyebrow="Options insights"
+                description="Track OI, volume, PCR, and strike-level activity in a dedicated options view."
+                stats={[{ value: 'CE/PE', label: 'Strike view' }, { value: 'Live', label: 'OI updates' }, { value: 'Custom', label: 'Watchlist' }]}
+                highlights={['Open interest and volume snapshots', 'Strike-wise build-up view', 'API-ready data cards']}
+                ctaLabel="Open option chain"
+                ctaTo="/optionchain"
+              />
+            }
+          />
+          <Route
+            path="/features/blog"
+            element={
+              <FeaturePage
+                title="Blog"
+                eyebrow="Market education"
+                description="Publish educational notes, trade ideas, and tutorials in a clean content hub."
+                stats={[{ value: 'Unlimited', label: 'Posts' }, { value: 'SEO', label: 'Ready' }, { value: 'Admin', label: 'Managed' }]}
+                highlights={['Article cards and detail pages', 'Admin publishing workflow', 'Easy content API migration']}
+                ctaLabel="Open blog"
+                ctaTo="/blog"
+              />
+            }
+          />
+          <Route
+            path="/features/news"
+            element={
+              <FeaturePage
+                title="News"
+                eyebrow="Market updates"
+                description="Show the latest headlines, market movers, and curated insights in one place."
+                stats={[{ value: 'Real-time', label: 'Feed' }, { value: 'Curated', label: 'Stories' }, { value: 'Fast', label: 'Updates' }]}
+                highlights={['Latest headlines and summaries', 'Category-based filtering', 'API-ready news feed']}
+                ctaLabel="Open news"
+                ctaTo="/news"
+              />
+            }
+          />
+          <Route
+            path="/features/sector"
+            element={
+              <FeaturePage
+                title="Sector Analysis"
+                eyebrow="Sector view"
+                description="Browse sector performance and strength across the market with a dedicated analysis page."
+                stats={[{ value: 'Top', label: 'Sectors' }, { value: 'Daily', label: 'Performance' }, { value: 'Custom', label: 'Filters' }]}
+                highlights={['Sector rotation highlights', 'Relative strength comparisons', 'Expandable insights']}
+                ctaLabel="Open sectors"
+                ctaTo="/sectors"
+              />
+            }
+          />
         </Routes>
       </AppShell>
 
@@ -114,15 +210,14 @@ export default function App() {
             <ul>
               <li><a href="https://www.youtube.com/@heyfund_official">YouTube Channel</a></li>
               <li><a href="https://t.me/heyfund">Telegram Group</a></li>
-            <li><a href="https://www.instagram.com/donimrantrader">Instagram Channel</a></li>
-
+              <li><a href="https://www.instagram.com/donimrantrader">Instagram Channel</a></li>
             </ul>
           </div>
           <div className="footer-col">
             <h5>Contact</h5>
             <ul>
               <li>askheyfund@gmail.com</li>
-              <li>+91 89855 35534 </li>
+              <li>+91 89855 35534</li>
               <li>India</li>
             </ul>
           </div>
