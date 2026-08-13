@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import HorizontalBarList from './HorizontalBarList'
 import './Dashboard.css'
 
-const API_BASE_URL = 'http://localhost:5000'
+const API_BASE_URL = 'https://heyfund-backend.onrender.com' // Adjust if your backend uses a different host/port
 
 const initialIndices = {
   nifty: { val: '--', change: '--', cls: 'up' },
