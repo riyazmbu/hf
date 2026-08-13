@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { MOCK_PCR_MAXPAIN } from '../mockData';
-import './Pages.css';
+import './pages.css';
 
 export default function PcrMaxPainPage() {
   const { indices, stocks } = MOCK_PCR_MAXPAIN;
