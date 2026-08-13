@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { MOCK_GREEKS_DATA } from '../mockData';
-import './Pages.css';
+import './pages.css';
 
 export default function GreeksPage() {
   const [selectedAsset, setSelectedAsset] = useState('NIFTY 50');

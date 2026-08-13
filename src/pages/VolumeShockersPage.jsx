@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { MOCK_VOLUME_SHOCKERS } from '../mockData';
-import './Pages.css';
+import './pages.css';
 
 export default function VolumeShockersPage() {
   const { summary, stocks } = MOCK_VOLUME_SHOCKERS;

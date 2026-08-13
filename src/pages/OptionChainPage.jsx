@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { MOCK_OPTION_CHAIN } from '../mockData';
-import './Pages.css';
+import './pages.css';
 
 export default function OptionChainPage() {
   const [selectedAsset, setSelectedAsset] = useState('BANKNIFTY');

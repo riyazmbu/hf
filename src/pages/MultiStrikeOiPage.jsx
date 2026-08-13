@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { MOCK_MULTI_STRIKE_OI } from '../mockData';
-import './Pages.css';
+import './pages.css';
 
 export default function MultiStrikeOiPage() {
   const [selectedAsset, setSelectedAsset] = useState('NIFTY 50');

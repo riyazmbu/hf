@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import './Pages.css';
+import './pages.css';
 
 // Base API URL - Adjust port if running on a separate host/port
 const API_BASE_URL =  'http://localhost:5000';

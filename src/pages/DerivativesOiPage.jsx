@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { MOCK_OI_BUILDUP } from '../mockData';
-import './Pages.css';
+import './pages.css';
 
 export default function DerivativesOiPage() {
   const [activeFilter, setActiveFilter] = useState('all');

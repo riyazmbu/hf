@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { MOCK_SECTOR_DATA } from '../mockData';
-import './Pages.css';
+import './pages.css';
 
 export default function SectorsPage() {
   const [timeframe, setTimeframe] = useState('1D');
