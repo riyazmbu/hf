@@ -1,299 +1,261 @@
-import { useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { NavLink, Link } from 'react-router-dom'
+import '../../Navigation.css'
 
 export default function AppShell({ children, navOpen, onToggleNav, onCloseNav }) {
-  const navigate = useNavigate()
   const [activeDropdown, setActiveDropdown] = useState(null)
-  const [mobileExpanded, setMobileExpanded] = useState({
-    market: false,
-    options: false,
-    research: false,
-    more: false
-  })
+  const navRef = useRef(null)
 
-  const handleNavigate = (path) => {
-    navigate(path)
+  // Toggle dropdown on click
+  const handleDropdownClick = (menuName, e) => {
+    e.stopPropagation()
+    setActiveDropdown((prev) => (prev === menuName ? null : menuName))
+  }
+
+  // Close everything when a menu link is clicked
+  const handleMenuClose = () => {
     setActiveDropdown(null)
-    onCloseNav()
+    if (onCloseNav) onCloseNav()
   }
 
-  const toggleMobileSubmenu = (key) => {
-    setMobileExpanded((prev) => ({ ...prev, [key]: !prev[key] }))
-  }
+  // Close dropdown when clicking outside or pressing Escape
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (navRef.current && !navRef.current.contains(event.target)) {
+        setActiveDropdown(null)
+      }
+    }
 
-  // Styles
-  const navHeaderStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '0 24px',
-    height: '68px',
-    backgroundColor: '#ffffff',
-    borderBottom: '1px solid #e2e8f0',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
-    position: 'sticky',
-    top: 0,
-    zIndex: 1000
-  }
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setActiveDropdown(null)
+      }
+    }
 
-  const baseLinkStyle = {
-    textDecoration: 'none',
-    color: '#334155',
-    fontSize: '14px',
-    fontWeight: 500,
-    padding: '8px 12px',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '4px'
-  }
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
 
-  const dropdownCardStyle = (isOpen) => ({
-    display: isOpen ? 'flex' : 'none',
-    flexDirection: 'column',
-    position: 'absolute',
-    top: 'calc(100% + 4px)',
-    left: '0',
-    backgroundColor: '#ffffff',
-    minWidth: '180px',
-    padding: '6px',
-    borderRadius: '8px',
-    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05)',
-    border: '1px solid #e2e8f0',
-    zIndex: 1100
-  })
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [])
 
   return (
-    <>
-      {/* Dynamic Mobile CSS Injection */}
-      <style>{`
-        .desktop-menu { display: flex; align-items: center; gap: 4px; }
-        .mobile-menu-btn { display: none; background: transparent; border: none; cursor: pointer; padding: 6px; }
-        .hover-item:hover { background-color: #f1f5f9; color: #1e293b; }
-        .dropdown-link:hover { background-color: #f8fafc; color: #2563eb; }
-        
-        @media (max-width: 868px) {
-          .desktop-menu { display: none !important; }
-          .mobile-menu-btn { display: block !important; }
-        }
-      `}</style>
+    <div className="app-layout">
+      {/* Top Header */}
+      <header className="main-header">
+        <div className="header-container">
+          
+          {/* Brand Logo & Live Market Badge */}
+          <div className="brand-group">
+            <Link to="/" className="brand-logo-link" onClick={handleMenuClose}>
+              <img src="/logo.png" alt="HeyFund Logo" className="header-logo" />
+            </Link>
+            <div className="live-status-pill">
+              <span className="live-dot"></span>
+              <span className="live-text">NSE LIVE</span>
+            </div>
+          </div>
 
-      <header style={navHeaderStyle}>
-        {/* Brand Logo */}
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <a href="/" style={{ textDecoration: 'none' }}>
-            <img src="/logo.png" alt="HeyFund Logo" style={{ height: '42px', width: 'auto', display: 'block' }} />
-          </a>
+          {/* Desktop Navigation Menu */}
+          <nav className={`desktop-nav ${navOpen ? 'mobile-open' : ''}`} ref={navRef}>
+            
+            {/* Home */}
+            <NavLink to="/" className="nav-tab" onClick={handleMenuClose}>
+              Home
+            </NavLink>
+
+            {/* MARKET DROPDOWN */}
+            <div className="nav-tab-dropdown">
+              <button 
+                type="button"
+                className={`nav-tab dropdown-btn ${activeDropdown === 'market' ? 'active' : ''}`}
+                onClick={(e) => handleDropdownClick('market', e)}
+              >
+                Market <span className="arrow-icon">▾</span>
+              </button>
+
+              <div className={`mega-menu-panel ${activeDropdown === 'market' ? 'visible' : ''}`}>
+                <div className="mega-menu-grid">
+                  
+                  {/* Category 1: Price & Momentum */}
+                  <div className="menu-col">
+                    <div className="col-header">
+                      <span className="col-icon">⚡</span>
+                      <span>Price & Momentum</span>
+                    </div>
+                    
+                    <Link to="/market-data/ltp" className="menu-item-card" onClick={handleMenuClose}>
+                      <div className="item-title-row">
+                        <span className="item-title">Gainers & Losers</span>
+                        <span className="badge badge-hot">HOT</span>
+                      </div>
+                      <p className="item-desc">Top 10 intraday price movers by % change</p>
+                    </Link>
+
+                    {/* <Link to="/market-data/volume-shockers" className="menu-item-card" onClick={handleMenuClose}>
+                      <div className="item-title-row">
+                        <span className="item-title">Volume Shockers</span>
+                        <span className="badge badge-live">LIVE</span>
+                      </div>
+                      <p className="item-desc">Stocks with 3x+ volume spike vs avg</p>
+                    </Link> */}
+
+                    <Link to="/market-data/historical" className="menu-item-card" onClick={handleMenuClose}>
+                      <div className="item-title-row">
+                        <span className="item-title">OHLC & Historical</span>
+                      </div>
+                      <p className="item-desc">Open, High, Low, Close & Candle charts</p>
+                    </Link>
+                  </div>
+
+                  {/* Category 2: Market Intelligence */}
+                  <div className="menu-col">
+                    <div className="col-header">
+                      <span className="col-icon">🧠</span>
+                      <span>Market Intelligence</span>
+                    </div>
+
+                    <Link to="/sectors" className="menu-item-card" onClick={handleMenuClose}>
+                      <div className="item-title-row">
+                        <span className="item-title">Sector Performance</span>
+                      </div>
+                      <p className="item-desc">Realtime sector heatmaps & strength</p>
+                    </Link>
+
+                    {/* <Link to="/market-data/fii-dii" className="menu-item-card" onClick={handleMenuClose}>
+                      <div className="item-title-row">
+                        <span className="item-title">FII / DII Flow</span>
+                        <span className="badge badge-new">NEW</span>
+                      </div>
+                      <p className="item-desc">Institutional net cash & F&O buy/sell data</p>
+                    </Link> */}
+
+                    {/* <Link to="/market-data/fundamentals" className="menu-item-card" onClick={handleMenuClose}>
+                      <div className="item-title-row">
+                        <span className="item-title">Fundamentals</span>
+                      </div>
+                      <p className="item-desc">Financial ratios, earnings & balance sheets</p>
+                    </Link> */}
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            {/* OPTIONS DROPDOWN */}
+            <div className="nav-tab-dropdown">
+              <button 
+                type="button"
+                className={`nav-tab dropdown-btn ${activeDropdown === 'options' ? 'active' : ''}`}
+                onClick={(e) => handleDropdownClick('options', e)}
+              >
+                Options <span className="arrow-icon">▾</span>
+              </button>
+
+              <div className={`mega-menu-panel ${activeDropdown === 'options' ? 'visible' : ''}`}>
+                <div className="mega-menu-grid">
+                  
+                  {/* Category 1: Chain & Greeks */}
+                  <div className="menu-col">
+                    <div className="col-header">
+                      <span className="col-icon">🎯</span>
+                      <span>Chain & Greeks</span>
+                    </div>
+
+                    <Link to="/optionchain" className="menu-item-card" onClick={handleMenuClose}>
+                      <div className="item-title-row">
+                        <span className="item-title">Live Option Chain</span>
+                        <span className="badge badge-live">LIVE</span>
+                      </div>
+                      <p className="item-desc">Realtime strike matrix, OI & volume bars</p>
+                    </Link>
+
+                    <Link to="/options-data/greeks" className="menu-item-card" onClick={handleMenuClose}>
+                      <div className="item-title-row">
+                        <span className="item-title">Option Greeks</span>
+                      </div>
+                      <p className="item-desc">Delta, Gamma, Theta, Vega & IV Rank</p>
+                    </Link>
+                  </div>
+
+                  {/* Category 2: OI Analytics & Sentiment */}
+                  <div className="menu-col">
+                    <div className="col-header">
+                      <span className="col-icon">📊</span>
+                      <span>OI & Volatility</span>
+                    </div>
+
+                    <Link to="/options-data/oi" className="menu-item-card" onClick={handleMenuClose}>
+                      <div className="item-title-row">
+                        <span className="item-title">Derivatives Build-Up</span>
+                        <span className="badge badge-hot">HOT</span>
+                      </div>
+                      <p className="item-desc">Long/Short Build-up & Short Covering</p>
+                    </Link>
+
+                    <Link to="/options-data/pcr" className="menu-item-card" onClick={handleMenuClose}>
+                      <div className="item-title-row">
+                        <span className="item-title">Put Call Ratio (PCR)</span>
+                      </div>
+                      <p className="item-desc">Market sentiment & sentiment trends</p>
+                    </Link>
+
+                    {/* <Link to="/options-data/max-pain" className="menu-item-card" onClick={handleMenuClose}>
+                      <div className="item-title-row">
+                        <span className="item-title">Max Pain & Straddles</span>
+                      </div>
+                      <p className="item-desc">Option writer loss levels & straddle pricing</p>
+                    </Link> */}
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            {/* Direct Links */}
+            <NavLink to="/screener" className="nav-tab" onClick={handleMenuClose}>
+              Screener
+            </NavLink>
+
+            <NavLink to="/news" className="nav-tab" onClick={handleMenuClose}>
+              News
+            </NavLink>
+
+            <NavLink to="/blog" className="nav-tab" onClick={handleMenuClose}>
+              Blog
+            </NavLink>
+
+            <NavLink to="/about" className="nav-tab" onClick={handleMenuClose}>
+              About
+            </NavLink>
+          </nav>
+
+          {/* Actions & Mobile Toggle */}
+          <div className="header-actions">
+            <Link to="/screener" className="header-cta-btn" onClick={handleMenuClose}>
+              ⚡ Open Screener
+            </Link>
+
+            <button 
+              className={`hamburger-btn ${navOpen ? 'is-active' : ''}`}
+              onClick={onToggleNav}
+              aria-label="Toggle Navigation Menu"
+            >
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+          </div>
+
         </div>
-
-        {/* Desktop Navigation */}
-        <nav className="desktop-menu">
-          <NavLink
-            to="/"
-            end
-            style={({ isActive }) => ({
-              ...baseLinkStyle,
-              color: isActive ? '#2563eb' : '#334155',
-              backgroundColor: isActive ? '#eff6ff' : 'transparent',
-              fontWeight: isActive ? 600 : 500
-            })}
-          >
-            Home
-          </NavLink>
-
-          {/* Market Dropdown */}
-          <div
-            style={{ position: 'relative' }}
-            onMouseEnter={() => setActiveDropdown('market')}
-            onMouseLeave={() => setActiveDropdown(null)}
-          >
-            <div style={{ ...baseLinkStyle, backgroundColor: activeDropdown === 'market' ? '#f8fafc' : 'transparent' }}>
-              Market <span style={{ fontSize: '10px', color: '#94a3b8' }}>▼</span>
-            </div>
-            <div style={dropdownCardStyle(activeDropdown === 'market')}>
-              <div className="dropdown-link" style={{ padding: '8px 12px', fontSize: '13.5px', borderRadius: '4px', cursor: 'pointer' }} onClick={() => handleNavigate('/market-data/ltp')}>Stocks</div>
-              <div className="dropdown-link" style={{ padding: '8px 12px', fontSize: '13.5px', borderRadius: '4px', cursor: 'pointer' }} onClick={() => handleNavigate('/market-data/ohlc')}>Indices</div>
-              <div className="dropdown-link" style={{ padding: '8px 12px', fontSize: '13.5px', borderRadius: '4px', cursor: 'pointer' }} onClick={() => handleNavigate('/market-data/historical')}>Market Overview</div>
-              <div className="dropdown-link" style={{ padding: '8px 12px', fontSize: '13.5px', borderRadius: '4px', cursor: 'pointer' }} onClick={() => handleNavigate('/market-data/fii-dii')}>Gainers</div>
-              <div className="dropdown-link" style={{ padding: '8px 12px', fontSize: '13.5px', borderRadius: '4px', cursor: 'pointer' }} onClick={() => handleNavigate('/market-data/fundamentals')}>Losers</div>
-            </div>
-          </div>
-
-          {/* Options Dropdown */}
-          <div
-            style={{ position: 'relative' }}
-            onMouseEnter={() => setActiveDropdown('options')}
-            onMouseLeave={() => setActiveDropdown(null)}
-          >
-            <div style={{ ...baseLinkStyle, backgroundColor: activeDropdown === 'options' ? '#f8fafc' : 'transparent' }}>
-              Options <span style={{ fontSize: '10px', color: '#94a3b8' }}>▼</span>
-            </div>
-            <div style={dropdownCardStyle(activeDropdown === 'options')}>
-              <div className="dropdown-link" style={{ padding: '8px 12px', fontSize: '13.5px', borderRadius: '4px', cursor: 'pointer' }} onClick={() => handleNavigate('/optionchain')}>Option Chain</div>
-              <div className="dropdown-link" style={{ padding: '8px 12px', fontSize: '13.5px', borderRadius: '4px', cursor: 'pointer' }} onClick={() => handleNavigate('/options-data/screener')}>Option Screener</div>
-              <div className="dropdown-link" style={{ padding: '8px 12px', fontSize: '13.5px', borderRadius: '4px', cursor: 'pointer' }} onClick={() => handleNavigate('/options-data/oi')}>OI Analysis</div>
-              <div className="dropdown-link" style={{ padding: '8px 12px', fontSize: '13.5px', borderRadius: '4px', cursor: 'pointer' }} onClick={() => handleNavigate('/options-data/pcr')}>PCR</div>
-              <div className="dropdown-link" style={{ padding: '8px 12px', fontSize: '13.5px', borderRadius: '4px', cursor: 'pointer' }} onClick={() => handleNavigate('/options-data/max-pain')}>Max Pain</div>
-              <div className="dropdown-link" style={{ padding: '8px 12px', fontSize: '13.5px', borderRadius: '4px', cursor: 'pointer' }} onClick={() => handleNavigate('/options-data/greeks')}>Greeks</div>
-            </div>
-          </div>
-
-          {/* Screener Link */}
-          <NavLink
-            to="/screener"
-            style={({ isActive }) => ({
-              ...baseLinkStyle,
-              color: isActive ? '#2563eb' : '#334155',
-              backgroundColor: isActive ? '#eff6ff' : 'transparent',
-              fontWeight: isActive ? 600 : 500
-            })}
-          >
-            Screener
-          </NavLink>
-
-          {/* Research Dropdown */}
-          <div
-            style={{ position: 'relative' }}
-            onMouseEnter={() => setActiveDropdown('research')}
-            onMouseLeave={() => setActiveDropdown(null)}
-          >
-            <div style={{ ...baseLinkStyle, backgroundColor: activeDropdown === 'research' ? '#f8fafc' : 'transparent' }}>
-              Research <span style={{ fontSize: '10px', color: '#94a3b8' }}>▼</span>
-            </div>
-            <div style={dropdownCardStyle(activeDropdown === 'research')}>
-              <div className="dropdown-link" style={{ padding: '8px 12px', fontSize: '13.5px', borderRadius: '4px', cursor: 'pointer' }} onClick={() => handleNavigate('/sectors')}>Sector</div>
-              <div className="dropdown-link" style={{ padding: '8px 12px', fontSize: '13.5px', borderRadius: '4px', cursor: 'pointer' }} onClick={() => handleNavigate('/news')}>Market News</div>
-              <div className="dropdown-link" style={{ padding: '8px 12px', fontSize: '13.5px', borderRadius: '4px', cursor: 'pointer' }} onClick={() => handleNavigate('/blog')}>Blog</div>
-            </div>
-          </div>
-
-          {/* More Dropdown */}
-          <div
-            style={{ position: 'relative' }}
-            onMouseEnter={() => setActiveDropdown('more')}
-            onMouseLeave={() => setActiveDropdown(null)}
-          >
-            <div style={{ ...baseLinkStyle, backgroundColor: activeDropdown === 'more' ? '#f8fafc' : 'transparent' }}>
-              More <span style={{ fontSize: '10px', color: '#94a3b8' }}>▼</span>
-            </div>
-            <div style={dropdownCardStyle(activeDropdown === 'more')}>
-              <div className="dropdown-link" style={{ padding: '8px 12px', fontSize: '13.5px', borderRadius: '4px', cursor: 'pointer' }} onClick={() => handleNavigate('/about')}>About</div>
-              <div className="dropdown-link" style={{ padding: '8px 12px', fontSize: '13.5px', borderRadius: '4px', cursor: 'pointer' }} onClick={() => handleNavigate('/contact')}>Contact</div>
-            </div>
-          </div>
-        </nav>
-
-        {/* Mobile Hamburger Toggle Button */}
-        <button className="mobile-menu-btn" onClick={onToggleNav} aria-label="Toggle Menu">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#334155" strokeWidth="2">
-            <path d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
       </header>
 
-      {/* Mobile Slide-out Drawer */}
-      {navOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.4)',
-            zIndex: 1200,
-            display: 'flex',
-            justifyContent: 'flex-end'
-          }}
-          onClick={onCloseNav}
-        >
-          <div
-            style={{
-              width: '280px',
-              height: '100%',
-              backgroundColor: '#ffffff',
-              padding: '20px 16px',
-              boxShadow: '-4px 0 20px rgba(0,0,0,0.1)',
-              overflowY: 'auto'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px' }}>
-              <span style={{ fontWeight: 600, color: '#0f172a' }}>Navigation</span>
-              <button style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer' }} onClick={onCloseNav}>✕</button>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div style={{ padding: '10px 12px', fontWeight: 500, color: '#334155', cursor: 'pointer' }} onClick={() => handleNavigate('/')}>Home</div>
-
-              {/* Mobile Market Accordion */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', fontWeight: 500, color: '#334155', cursor: 'pointer' }} onClick={() => toggleMobileSubmenu('market')}>
-                  Market <span>{mobileExpanded.market ? '▲' : '▼'}</span>
-                </div>
-                {mobileExpanded.market && (
-                  <div style={{ paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '6px', backgroundColor: '#f8fafc', padding: '8px 16px', borderRadius: '6px' }}>
-                    <div style={{ fontSize: '13.5px', color: '#475569', cursor: 'pointer' }} onClick={() => handleNavigate('/market-data/ltp')}>Stocks</div>
-                    <div style={{ fontSize: '13.5px', color: '#475569', cursor: 'pointer' }} onClick={() => handleNavigate('/market-data/ohlc')}>Indices</div>
-                    <div style={{ fontSize: '13.5px', color: '#475569', cursor: 'pointer' }} onClick={() => handleNavigate('/market-data/historical')}>Market Overview</div>
-                    <div style={{ fontSize: '13.5px', color: '#475569', cursor: 'pointer' }} onClick={() => handleNavigate('/market-data/fii-dii')}>Gainers</div>
-                    <div style={{ fontSize: '13.5px', color: '#475569', cursor: 'pointer' }} onClick={() => handleNavigate('/market-data/fundamentals')}>Losers</div>
-                  </div>
-                )}
-              </div>
-
-              {/* Mobile Options Accordion */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', fontWeight: 500, color: '#334155', cursor: 'pointer' }} onClick={() => toggleMobileSubmenu('options')}>
-                  Options <span>{mobileExpanded.options ? '▲' : '▼'}</span>
-                </div>
-                {mobileExpanded.options && (
-                  <div style={{ paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '6px', backgroundColor: '#f8fafc', padding: '8px 16px', borderRadius: '6px' }}>
-                    <div style={{ fontSize: '13.5px', color: '#475569', cursor: 'pointer' }} onClick={() => handleNavigate('/optionchain')}>Option Chain</div>
-                    <div style={{ fontSize: '13.5px', color: '#475569', cursor: 'pointer' }} onClick={() => handleNavigate('/options-data/screener')}>Option Screener</div>
-                    <div style={{ fontSize: '13.5px', color: '#475569', cursor: 'pointer' }} onClick={() => handleNavigate('/options-data/oi')}>OI Analysis</div>
-                    <div style={{ fontSize: '13.5px', color: '#475569', cursor: 'pointer' }} onClick={() => handleNavigate('/options-data/pcr')}>PCR</div>
-                    <div style={{ fontSize: '13.5px', color: '#475569', cursor: 'pointer' }} onClick={() => handleNavigate('/options-data/max-pain')}>Max Pain</div>
-                    <div style={{ fontSize: '13.5px', color: '#475569', cursor: 'pointer' }} onClick={() => handleNavigate('/options-data/greeks')}>Greeks</div>
-                  </div>
-                )}
-              </div>
-
-              <div style={{ padding: '10px 12px', fontWeight: 500, color: '#334155', cursor: 'pointer' }} onClick={() => handleNavigate('/screener')}>Screener</div>
-
-              {/* Mobile Research Accordion */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', fontWeight: 500, color: '#334155', cursor: 'pointer' }} onClick={() => toggleMobileSubmenu('research')}>
-                  Research <span>{mobileExpanded.research ? '▲' : '▼'}</span>
-                </div>
-                {mobileExpanded.research && (
-                  <div style={{ paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '6px', backgroundColor: '#f8fafc', padding: '8px 16px', borderRadius: '6px' }}>
-                    <div style={{ fontSize: '13.5px', color: '#475569', cursor: 'pointer' }} onClick={() => handleNavigate('/sectors')}>Sector</div>
-                    <div style={{ fontSize: '13.5px', color: '#475569', cursor: 'pointer' }} onClick={() => handleNavigate('/news')}>Market News</div>
-                    <div style={{ fontSize: '13.5px', color: '#475569', cursor: 'pointer' }} onClick={() => handleNavigate('/blog')}>Blog</div>
-                  </div>
-                )}
-              </div>
-
-              {/* Mobile More Accordion */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', fontWeight: 500, color: '#334155', cursor: 'pointer' }} onClick={() => toggleMobileSubmenu('more')}>
-                  More <span>{mobileExpanded.more ? '▲' : '▼'}</span>
-                </div>
-                {mobileExpanded.more && (
-                  <div style={{ paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '6px', backgroundColor: '#f8fafc', padding: '8px 16px', borderRadius: '6px' }}>
-                    <div style={{ fontSize: '13.5px', color: '#475569', cursor: 'pointer' }} onClick={() => handleNavigate('/about')}>About</div>
-                    <div style={{ fontSize: '13.5px', color: '#475569', cursor: 'pointer' }} onClick={() => handleNavigate('/contact')}>Contact</div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Main Page Container */}
-      <main style={{ maxWidth: '1280px', margin: '0 auto', padding: '24px 16px' }}>
+      {/* Main Viewport */}
+      <main className="main-viewport">
         {children}
       </main>
-    </>
+    </div>
   )
 }

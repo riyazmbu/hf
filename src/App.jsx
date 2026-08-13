@@ -8,9 +8,23 @@ import Screener from './Screener'
 import About from './About'
 import Contact from './Contact'
 import Sector from './Sector'
+import MultiStrikeOiPage from './pages/MultiStrikeOiPage'
 import HomeDashboard from './components/dashboard/HomeDashboard'
 import AppShell from './components/layout/AppShell'
 import FeaturePage from './components/pages/FeaturePage'
+import DerivativesOiPage from './pages/DerivativesOiPage'
+import PcrMaxPainPage from './pages/PcrMaxPainPage'
+import OptionChainPage from './pages/OptionChainPage'
+import './pages/pages.css';
+import SectorsPage from './pages/SectorsPage'
+import GreeksPage from './pages/GreeksPage'
+import OhlcHistoricalPage from './pages/OhlcHistoricalPage'
+
+import VolumeShockersPage from './pages/VolumeShockersPage'
+// Update Route inside <Routes>:
+
+import GainersLosersPage from './pages/GainersLosersPage'
+import FiiDiiPage from './pages/FiiDiiPage'
 
 const PROMO_DISMISS_KEY = 'heyfund_promo_dismissed_until'
 
@@ -69,19 +83,18 @@ export default function App() {
           <Route path="/" element={<HomeDashboard />} />
           
           {/* Market Data Routes */}
-          <Route path="/market-data/ltp" element={<FeaturePage title="LTP Data" eyebrow="Market Data" description="Live Last Traded Price streams and realtime ticks." ctaLabel="Open Dashboard" ctaTo="/" />} />
-          <Route path="/market-data/ohlc" element={<FeaturePage title="OHLC Data" eyebrow="Market Data" description="Open, High, Low, and Close updates across indices and stocks." ctaLabel="Open Dashboard" ctaTo="/" />} />
-          <Route path="/market-data/historical" element={<FeaturePage title="Historical Data" eyebrow="Market Data" description="Historical price action, charts, and backtesting metrics." ctaLabel="Open Screener" ctaTo="/screener" />} />
-          <Route path="/market-data/fii-dii" element={<FeaturePage title="FII / DII Activity" eyebrow="Market Data" description="Institutional buying and selling data across Cash and F&O." ctaLabel="Open Dashboard" ctaTo="/" />} />
+<Route path="/market-data/ltp" element={<GainersLosersPage />} />
+<Route path="/market-data/fii-dii" element={<FiiDiiPage />} />          
+<Route path="/market-data/historical" element={<OhlcHistoricalPage />} />          <Route path="/market-data/historical" element={<FeaturePage title="Historical Data" eyebrow="Market Data" description="Historical price action, charts, and backtesting metrics." ctaLabel="Open Screener" ctaTo="/screener" />} />
           <Route path="/market-data/fundamentals" element={<FeaturePage title="Fundamentals" eyebrow="Market Data" description="Financial statements, ratios, quarterly results, and balance sheets." ctaLabel="Open Screener" ctaTo="/screener" />} />
-          
+          <Route path="/market-data/volume-shockers" element={<VolumeShockersPage />} />
           {/* Options Data Routes */}
           <Route path="/options-data/chain" element={<OptionChain />} />
-          <Route path="/options-data/greeks" element={<FeaturePage title="Option Greeks" eyebrow="Options Data" description="Delta, Gamma, Theta, Vega, and IV analytics for options contracts." ctaLabel="Open Option Chain" ctaTo="/optionchain" />} />
-          <Route path="/options-data/oi" element={<FeaturePage title="Open Interest Analysis" eyebrow="Options Data" description="OI build-up, long unwinding, and short covering tracking." ctaLabel="Open Option Chain" ctaTo="/optionchain" />} />
-          <Route path="/options-data/pcr" element={<FeaturePage title="Put Call Ratio (PCR)" eyebrow="Options Data" description="Track overall market sentiment with live PCR charts and trends." ctaLabel="Open Option Chain" ctaTo="/optionchain" />} />
+          <Route path="/options-data/greeks" element={<GreeksPage />} />
+<Route path="/options-data/oi" element={<DerivativesOiPage />} />
+<Route path="/options-data/pcr" element={<PcrMaxPainPage />} />
           <Route path="/options-data/max-pain" element={<FeaturePage title="Max Pain" eyebrow="Options Data" description="Expiry strike projections and maximum loss levels for option writers." ctaLabel="Open Option Chain" ctaTo="/optionchain" />} />
-
+<Route path="/options-data/multi-strike-oi" element={<MultiStrikeOiPage />} />
           {/* Core Routes */}
           <Route
             path="/blog/:slug?"
@@ -94,8 +107,8 @@ export default function App() {
           />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/optionchain" element={<OptionChain />} />
-          <Route path="/sectors" element={<Sector />} />
+<Route path="/optionchain" element={<OptionChainPage />} />
+          <Route path="/sectors" element={<SectorsPage />} />
           <Route
             path="/admin"
             element={<AdminLogin onLoginSuccess={handleAdminLoginSuccess} />}
