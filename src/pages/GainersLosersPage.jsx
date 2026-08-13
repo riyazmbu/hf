@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './pages.css';
 
-const API_BASE_URL = 'http://localhost:5000'; // Adjust if your backend uses a different host/port
+const API_BASE_URL = 'https://heyfund-backend.onrender.com'; // Adjust if your backend uses a different host/port
 
 export default function GainersLosersPage() {
   const [activeTab, setActiveTab] = useState('gainers');

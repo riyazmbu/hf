@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './pages.css';
 
 // Base API URL - Adjust port if running on a separate host/port
-const API_BASE_URL =  'http://localhost:5000';
+const API_BASE_URL =  'https://heyfund-backend.onrender.com';
 
 export default function OhlcHistoricalPage() {
   const [selectedSymbol, setSelectedSymbol] = useState('NIFTY 50');
